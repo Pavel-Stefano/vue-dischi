@@ -1,19 +1,23 @@
 <template>
-<section class="container">
+    <section class="container">
         <app-loader v-if="loading" />
 
-        <div class="box" v-for="(disc) in discList" :key="disc.id">
+        <search-component :discGenre="genre" @mySearch="setSearchText($event)"  />
+
+        <div class="box" v-for="(disc) in filteredList" :key="disc.id">
             <app-card :item= "disc" />
         </div>
 
-</section>
+    </section>
     
 </template>
 
 <script>
 import AppLoader from './AppLoader.vue';
 import AppCard from './AppCard.vue';
+import SearchComponent from './SearchComponent.vue';
 import axios from 'axios';
+
 
 
 export default {
@@ -21,6 +25,7 @@ export default {
     components: {
         AppCard,
         AppLoader,
+        SearchComponent,
         
     },
     data(){
@@ -28,7 +33,27 @@ export default {
             discList: [],
             apiDisc: 'https://flynn.boolean.careers/exercises/api/array/',
             loading: false,
+            genre: [],
+            searchText:'',
         }
+    },
+    methods: {
+        setSearchText(testo){
+            this.searchText = testo;
+            console.log(this.searchText, 'searchText')
+        }
+    },
+    computed: {
+        filteredList(){
+            
+            if(this.searchText === '') return this.discList;
+            return this.discList.filter((disc)=>{
+                return disc.genre === this.searchText;
+            })
+            
+        },
+        
+
     },
     mounted() {
         this.loading = true;
@@ -36,11 +61,17 @@ export default {
             // console.log(res);
             this.discList = res.data.response;
             // console.log(this.discList)
+            this.discList.forEach((el)=> {
+                if(!this.genre.includes(el.genre)) {
+                    this.genre.push(el.genre);
+                }
+            })
+            console.log(this.genre)
             this.loading = false;
         }).catch((error)=> {
             console.log(error);
         })
-    }
+    },
     
 }
 </script>
